@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  firebaseUid String       @unique
+  firstName   String
+  lastName    String
+  phone       String
+  userType    UserType
+
+  clientData  ClientData?
+  providerData ProviderData?
+
+  @@map("Usuario")
+}
+
+model ClientData {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  street       String
+  houseNumber  Int
+  reference    String
+  neighborhood String
+  city         City
+  state        State
+  userId       String   @unique @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProviderData {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  neighborhood String
+  city       City
+  state      State
+  profession Profession
+  userId     String   @unique @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserType {
+  CLIENT
+  PROVIDER
+}
+
+enum City {
+  CAPAO_DA_CANOA
+  XANGRI_LA
+  TRAMANDAI
+  IMBE
+  CURUMIM
+}
+
+enum State {
+  RS
+}
+
+enum Profession {
+  ELECTRICIAN
+  PLUMBER
+  CARPENTER
+  PAINTER
+  MASON
+  OTHERS
+}

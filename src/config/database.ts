@@ -1,37 +1,37 @@
-import mongoose from "mongoose";
+import { PrismaClient } from "@prisma/client";
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb://root:example@localhost:27017/feittopds?authSource=admin";
+export const prisma = new PrismaClient({
+  log: ["query", "info", "warn", "error"],
+});
 
 export const connectDatabase = async (): Promise<void> => {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log("MongoDB conectado com sucesso!");
+    await prisma.$connect();
+    console.log("🗄️ Prisma conectado com MongoDB com sucesso!");
   } catch (error) {
-    console.error("Erro ao conectar com MongoDB:", error);
+    console.error("❌ Erro ao conectar com MongoDB via Prisma:", error);
     process.exit(1);
   }
 };
 
 export const disconnectDatabase = async (): Promise<void> => {
   try {
-    await mongoose.disconnect();
-    console.log("MongoDB desconectado com sucesso!");
+    await prisma.$disconnect();
+    console.log("🗄️ Prisma desconectado do MongoDB com sucesso!");
   } catch (error) {
-    console.error("Erro ao desconectar MongoDB:", error);
+    console.error("❌ Erro ao desconectar Prisma:", error);
   }
 };
 
-// Event listeners para monitorar a conexão
-mongoose.connection.on("connected", () => {
-  console.log("Mongoose conectado ao MongoDB");
+// Função para graceful shutdown - apenas para SIGINT e SIGTERM
+process.on("SIGINT", async () => {
+  console.log("🔄 Recebido SIGINT. Desconectando do banco de dados...");
+  await disconnectDatabase();
+  process.exit(0);
 });
 
-mongoose.connection.on("error", (error) => {
-  console.error("Erro na conexão do Mongoose:", error);
-});
-
-mongoose.connection.on("disconnected", () => {
-  console.log("Mongoose desconectado do MongoDB");
+process.on("SIGTERM", async () => {
+  console.log("🔄 Recebido SIGTERM. Desconectando do banco de dados...");
+  await disconnectDatabase();
+  process.exit(0);
 });
