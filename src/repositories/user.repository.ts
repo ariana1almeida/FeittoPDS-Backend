@@ -16,4 +16,11 @@ export class UserRepository {
       include: { clientData: true, providerData: true },
     });
   }
+
+  async getUserByFirebaseUid(firebaseUid: string) {
+    return this.prismaClient.user.findUnique({
+      where: { firebaseUid },
+      include: { clientData: true, providerData: true },
+    });
+  }
 }

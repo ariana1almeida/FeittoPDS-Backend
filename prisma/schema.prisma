@@ -15,8 +15,9 @@ model User {
   phone       String
   userType    UserType
 
-  clientData  ClientData?
-  providerData ProviderData?
+  clientData      ClientData?
+  providerData    ProviderData?
+  createdServices Service[] @relation("ClientServices")
 
   @@map("Usuario")
 }
@@ -34,13 +35,29 @@ model ClientData {
 }
 
 model ProviderData {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
   neighborhood String
   city       City
   state      State
   profession Profession
-  userId     String   @unique @db.ObjectId
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String     @unique @db.ObjectId
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  foto        String
+  titulo      String
+  descricao   String
+  status      ServiceStatus @default(OPEN)
+  categoria   Profession
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  clientId    String        @db.ObjectId
+  client      User          @relation("ClientServices", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("Servico")
 }
 
 enum UserType {
@@ -67,4 +84,11 @@ enum Profession {
   PAINTER
   MASON
   OTHERS
+}
+
+enum ServiceStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
