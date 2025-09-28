@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDatabase} from "./config/database";
 import userRoutes from "./routes/user.routes";
 import authRoutes from "./routes/auth.routes";
+import serviceRoutes from "./routes/service.routes";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
 
 app.use("/users", userRoutes);
 app.use("/login", authRoutes);
+app.use("/services", serviceRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, TypeScript + Express + Prisma!");

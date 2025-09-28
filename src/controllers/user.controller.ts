@@ -54,11 +54,38 @@ export const login = async (req: Request, res: Response) => {
             localId: string;
         };
         const { idToken, refreshToken, expiresIn, localId } = response.data as FirebaseLoginResponse;
+
+        const user = await userService.getUserByFirebaseUid(localId);
+
+        if (!user) {
+            return res.status(404).json({ error: "Usuário não encontrado no banco de dados" });
+        }
+
+        let redirectUrl;
+        switch (user.userType) {
+            case "CLIENT":
+                redirectUrl = "/cliente/home";
+                break;
+            case "PROVIDER":
+                redirectUrl = "/prestador/home";
+                break;
+            default:
+                redirectUrl = "/";
+        }
+
         return res.status(200).json({
             token: idToken,
             refreshToken,
             expiresIn,
             uid: localId,
+            userType: user.userType,
+            redirectUrl,
+            user: {
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                userType: user.userType
+            }
         });
         }catch (error: any) {
         console.error(error.response?.data || error.message);
