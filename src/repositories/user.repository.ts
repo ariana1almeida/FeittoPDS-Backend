@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import {Prisma, PrismaClient, User} from "@prisma/client";
 
 export class UserRepository {
   private prismaClient: PrismaClient;
@@ -13,6 +13,18 @@ export class UserRepository {
 
   async getAllUsers() {
     return this.prismaClient.user.findMany({
+      include: { clientData: true, providerData: true },
+    });
+  }
+
+  /**
+   * Get user profile information by user ID, including related clientData and providerData.
+   * @param userId
+   */
+  async getUserProfileInformation(firebaseUid: any) {
+    // return null;
+    return this.prismaClient.user.findUnique({
+      where: { firebaseUid: firebaseUid },
       include: { clientData: true, providerData: true },
     });
   }

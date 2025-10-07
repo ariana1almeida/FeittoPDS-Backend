@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/database";
 import { UserRepository } from "../repositories/user.repository";
-import { UserService } from "../services/user.service";
+import {UserService, CreateUserInput} from "../services/user.service";
 import axios from "axios";
 
 const userService = new UserService(new UserRepository(prisma));
@@ -9,21 +9,25 @@ const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY as string;
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, phone, email, password, userType, data } = req.body;
+      const userInput: CreateUserInput = {
+          ...req.body
+      };
 
-    if (!firstName || !lastName || !phone || !email || !password || !userType || !data) {
-      return res.status(400).json({ error: "É necessário preencher todos os campos" });
-    }
+      if (!userInput.firstName ||
+          !userInput.lastName ||
+          !userInput.phone ||
+          !userInput.email ||
+          !userInput.password ||
+          !userInput.userType ||
+          !userInput.data ||
+          !userInput.city ||
+          !userInput.neighborhood ||
+          !userInput.state
+      ) {
+          return res.status(400).json({error: "É necessário preencher todos os campos"});
+      }
 
-    const newUser = await userService.createUser({
-      firstName,
-      lastName,
-      phone,
-      email,
-      password,
-      userType,
-      data,
-    });
+    const newUser = await userService.createUser(userInput);
 
     return res.status(201).json(newUser);
   } catch (error: any) {
@@ -35,10 +39,14 @@ export const createUser = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({ error: "É necessário preencher todos os campos"});
         }
+
+        //TODO remover
         console.log("FIREBASE_API_KEY:", FIREBASE_API_KEY);
+
         const response = await axios.post(
             `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
             {
@@ -75,3 +83,15 @@ export const getAllUsers = async (req: Request, res: Response) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+export const getProfile = async (req: Request, res: Response) => {
+    try {
+        let uniqueIdentifier = req.params.id;
+
+        let userProfileDto = await userService.getUserProfileInformation(uniqueIdentifier)
+
+        return res.status(200).json(userProfileDto);
+    }catch (error: any) {
+        //TODO adicionar mensagem de erro caso algum problema aconteça durante a busca do perfil do usuário
+    }
+}

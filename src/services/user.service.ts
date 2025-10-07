@@ -1,14 +1,18 @@
-import { Prisma, UserType } from "@prisma/client";
+import {Prisma, UserType} from "@prisma/client";
 import { UserRepository } from "../repositories/user.repository";
 import { auth } from "../config/firebase";
+import {UserProfileDto} from "../types/UserProfileDto";
 
-interface CreateUserInput {
+export interface CreateUserInput {
   firstName: string;
   lastName: string;
   phone: string;
   email: string;
   password: string;
   userType: UserType;
+  city: string;
+  neighborhood: string;
+  state: string;
   data: any;
 }
 
@@ -26,34 +30,17 @@ export class UserService {
     });
 
     const userData: Prisma.UserCreateInput = {
+      firebaseUid: firebaseUser.uid,
       firstName: input.firstName,
       lastName: input.lastName,
       phone: input.phone,
+      city: input.city,
+      neighborhood: input.neighborhood,
+      state: input.state,
       userType: input.userType,
-      firebaseUid: firebaseUser.uid,
       ...(input.userType === "CLIENT"
-        ? {
-            clientData: {
-              create: {
-                street: input.data.street,
-                houseNumber: input.data.houseNumber,
-                reference: input.data.reference,
-                neighborhood: input.data.neighborhood,
-                city: input.data.city,
-                state: input.data.state,
-              },
-            },
-          }
-        : {
-            providerData: {
-              create: {
-                neighborhood: input.data.neighborhood,
-                city: input.data.city,
-                state: input.data.state,
-                profession: input.data.profession,
-              },
-            },
-          }),
+          ? {clientData: {create: {...input.data}}}
+          : {providerData: {create: {profession: input.data.profession}}}),
     };
 
     return this.userRepository.createUser(userData);
@@ -61,5 +48,27 @@ export class UserService {
 
   async getAllUsers() {
     return this.userRepository.getAllUsers();
+  }
+
+  async getUserProfileInformation(uniqueIdentifier: any): Promise<UserProfileDto> {
+    const user = await this.userRepository.getUserProfileInformation(uniqueIdentifier);
+
+    if (!user) throw new Error("User not found");
+
+    return {
+      city: user.city,
+      state: user.state,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      neighborhood: user.neighborhood,
+      phone: user.phone,
+      userType: user.userType,
+      userData: {
+        street: user.userType === UserType.CLIENT ? user.clientData?.street : undefined,
+        houseNumber: user.userType === UserType.CLIENT ? user.clientData?.houseNumber : undefined,
+        reference: user.userType === UserType.CLIENT ? user.clientData?.reference : undefined,
+        profession: user.userType === UserType.PROVIDER ? user.providerData?.profession : undefined
+      }
+    };
   }
 }
