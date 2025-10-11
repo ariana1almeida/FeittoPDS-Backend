@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/database";
-import { UserRepository } from "../repositories/user.repository";
 import {UserService, CreateUserInput} from "../services/user.service";
 import axios from "axios";
 
-const userService = new UserService(new UserRepository(prisma));
+const userService = UserService.getInstance(prisma);
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY as string;
 
 export const createUser = async (req: Request, res: Response) => {
@@ -63,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
         };
         const { idToken, refreshToken, expiresIn, localId } = response.data as FirebaseLoginResponse;
 
-        const user = await userService.getUserByFirebaseUid(localId);
+        const user = await userService.getUserProfileInformation(localId);
 
         if (!user) {
             return res.status(404).json({ error: "Usuário não encontrado no banco de dados" });
@@ -72,10 +71,10 @@ export const login = async (req: Request, res: Response) => {
         let redirectUrl;
         switch (user.userType) {
             case "CLIENT":
-                redirectUrl = "/cliente/home";
+                redirectUrl = "/client/home";
                 break;
             case "PROVIDER":
-                redirectUrl = "/prestador/home";
+                redirectUrl = "/provider/home";
                 break;
             default:
                 redirectUrl = "/";
@@ -87,13 +86,7 @@ export const login = async (req: Request, res: Response) => {
             expiresIn,
             uid: localId,
             userType: user.userType,
-            redirectUrl,
-            user: {
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                userType: user.userType
-            }
+            redirectUrl
         });
         }catch (error: any) {
         console.error(error.response?.data || error.message);

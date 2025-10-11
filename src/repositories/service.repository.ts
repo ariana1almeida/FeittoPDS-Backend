@@ -1,10 +1,17 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-
 export class ServiceRepository {
+  private static instance: ServiceRepository;
   private prismaClient: PrismaClient;
 
-  constructor(prismaClient: PrismaClient) {
+  private constructor(prismaClient: PrismaClient) {
     this.prismaClient = prismaClient;
+  }
+
+  public static getInstance(prismaClient: PrismaClient): ServiceRepository {
+    if (!ServiceRepository.instance) {
+      ServiceRepository.instance = new ServiceRepository(prismaClient);
+    }
+    return ServiceRepository.instance;
   }
 
   async createService(data: Prisma.ServiceCreateInput) {
@@ -59,7 +66,7 @@ export class ServiceRepository {
 
   async getServicesByClient(clientId: string) {
     return this.prismaClient.service.findMany({
-      where: { clientId },
+      where: { clientId: clientId },
       include: {
         client: {
           select: {
@@ -76,9 +83,9 @@ export class ServiceRepository {
     });
   }
 
-  async getServicesByCategory(categoria: string) {
+  async getServicesByCategory(category: string) {
     return this.prismaClient.service.findMany({
-      where: { categoria: categoria as any },
+      where: { category: category as any },
       include: {
         client: {
           select: {

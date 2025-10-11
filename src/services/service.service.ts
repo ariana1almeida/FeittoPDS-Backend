@@ -1,68 +1,76 @@
-import { Prisma, Profession, ServiceStatus } from "@prisma/client";
-import { ServiceRepository } from "../repositories/service.repository";
-
-interface CreateServiceInput {
-  foto: string;
-  titulo: string;
-  descricao: string;
-  categoria: Profession;
-  clientId: string;
-}
-
+import {Prisma, PrismaClient, Profession, ServiceStatus} from "@prisma/client";
+import {ServiceRepository} from "../repositories/service.repository";
+import {UserRepository} from "../repositories/user.repository";
+import {CreateServiceInput} from "../types/CreateServiceInput";
+//TODO validar se os metodos daqui estão sendo utilizados e estão corretos
 export class ServiceService {
-  private serviceRepository: ServiceRepository;
+    private static instance: ServiceService;
+    private serviceRepository: ServiceRepository;
+    private userRepository: UserRepository;
 
-  constructor(serviceRepository: ServiceRepository) {
-    this.serviceRepository = serviceRepository;
-  }
+    private constructor(prisma: PrismaClient) {
+        this.serviceRepository = ServiceRepository.getInstance(prisma);
+        this.userRepository = UserRepository.getInstance(prisma);
+    }
 
-  async createService(input: CreateServiceInput) {
-    const serviceData: Prisma.ServiceCreateInput = {
-      foto: input.foto,
-      titulo: input.titulo,
-      descricao: input.descricao,
-      categoria: input.categoria,
-      status: ServiceStatus.OPEN,
-      client: {
-        connect: { id: input.clientId }
-      }
-    };
+    public static getInstance(prisma: PrismaClient): ServiceService {
+        if (!ServiceService.instance) {
+            ServiceService.instance = new ServiceService(prisma);
+        }
+        return ServiceService.instance;
+    }
 
-    return this.serviceRepository.createService(serviceData);
-  }
+    async createService(input: CreateServiceInput) {
+        const user = await this.userRepository.getUserByFirebaseUid(input.firebaseUid);
 
-  async getAllServices() {
-    return this.serviceRepository.getAllServices();
-  }
+        const serviceData: Prisma.ServiceCreateInput = {
+            picture: input.picture,
+            title: input.title,
+            description: input.description,
+            category: input.category,
+            status: ServiceStatus.OPEN,
+            client: {
+                connect: {id: user?.id}
+            }
+        };
 
-  async getServiceById(id: string) {
-    return this.serviceRepository.getServiceById(id);
-  }
+        return this.serviceRepository.createService(serviceData);
+    }
 
-  async getServicesByClient(clientId: string) {
-    return this.serviceRepository.getServicesByClient(clientId);
-  }
+    async getAllServices() {
+        return this.serviceRepository.getAllServices();
+    }
 
-  async getServicesByCategory(categoria: Profession) {
-    return this.serviceRepository.getServicesByCategory(categoria);
-  }
+    async getServiceById(id: string) {
+        return this.serviceRepository.getServiceById(id);
+    }
 
-  async updateServiceStatus(id: string, status: ServiceStatus) {
-    return this.serviceRepository.updateService(id, { status });
-  }
+    async getServicesByClient(firebaseUid: string) {
+        const user = await this.userRepository.getUserByFirebaseUid(firebaseUid);
+        // @ts-ignore
+        return this.serviceRepository.getServicesByClient(user.id);
+    }
 
-  async updateService(id: string, input: Partial<CreateServiceInput>) {
-    const updateData: Prisma.ServiceUpdateInput = {};
+    async getServicesByCategory(categoria: Profession) {
+        return this.serviceRepository.getServicesByCategory(categoria);
+    }
 
-    if (input.foto) updateData.foto = input.foto;
-    if (input.titulo) updateData.titulo = input.titulo;
-    if (input.descricao) updateData.descricao = input.descricao;
-    if (input.categoria) updateData.categoria = input.categoria;
+    async updateServiceStatus(id: string, status: ServiceStatus) {
+        return this.serviceRepository.updateService(id, {status});
+    }
 
-    return this.serviceRepository.updateService(id, updateData);
-  }
+    async updateService(id: string, input: Partial<CreateServiceInput>) {
+        const updateData: Prisma.ServiceUpdateInput = {};
 
-  async deleteService(id: string) {
-    return this.serviceRepository.deleteService(id);
-  }
+        if (input.picture) updateData.picture = input.picture;
+        if (input.title) updateData.title = input.title;
+        if (input.description) updateData.description = input.description;
+        if (input.category) updateData.category = input.category;
+
+        return this.serviceRepository.updateService(id, updateData);
+    }
+
+    async deleteService(id: string) {
+        return this.serviceRepository.deleteService(id);
+    }
 }

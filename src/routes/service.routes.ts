@@ -11,7 +11,7 @@ import {
 } from "../controllers/service.controller";
 
 const router = Router();
-
+//TODO revisar as rotas e ver se estão sendo usadas
 // Criar um novo serviço
 router.post("/", createService);
 
@@ -22,7 +22,7 @@ router.get("/", getAllServices);
 router.get("/:id", getServiceById);
 
 // Buscar serviços por cliente
-router.get("/client/:clientId", getServicesByClient);
+router.get("/client/:firebaseUid", getServicesByClient);
 
 // Buscar serviços por categoria
 router.get("/category/:categoria", getServicesByCategory);
