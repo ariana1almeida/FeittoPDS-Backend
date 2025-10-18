@@ -115,3 +115,24 @@ export const getProfile = async (req: Request, res: Response) => {
         //TODO adicionar mensagem de erro caso algum problema aconteça durante a busca do perfil do usuário
     }
 }
+
+export const updateProfile = async (req: Request, res: Response) => {
+    try {
+        const updateInformation= req.body;
+        const uniqueIdentifier = req.params.id;
+
+        if(!updateInformation || !uniqueIdentifier){
+            return res.status(400).json({
+                "error": "É necessário enviar as informações para atualização e o identificador único do usuário"
+            })
+        }
+
+        const updateResult = await userService.updateUserInformationByFirebaseUid(uniqueIdentifier, updateInformation);
+
+
+        return res.status(200).json(updateResult);
+
+    }catch (error: any) {
+        //TODO tratar o erro e retornar um status code de acordo com o erro
+    }
+}

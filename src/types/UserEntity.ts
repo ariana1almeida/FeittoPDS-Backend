@@ -6,10 +6,10 @@ export interface UserEntity {
     firstName: string;
     lastName: string;
     phone: string;
-    neighborhood: string;
+    userType: UserType;
     city: string;
     state: string;
-    userType: UserType;
+    neighborhood: string;
     clientData?: ClientDataEntity;
     providerData?: ProviderDataEntity;
 }

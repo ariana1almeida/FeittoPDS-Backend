@@ -62,20 +62,65 @@ export class UserService {
 
       if (!user) throw new Error("User not found");
 
-      return {
-        city: user.city,
-        state: user.state,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        neighborhood: user.neighborhood,
-        phone: user.phone,
-        userType: user.userType,
-        userData: {
-          street: user.userType === UserType.CLIENT ? user.clientData?.street : undefined,
-          houseNumber: user.userType === UserType.CLIENT ? user.clientData?.houseNumber : undefined,
-          reference: user.userType === UserType.CLIENT ? user.clientData?.reference : undefined,
-          profession: user.userType === UserType.PROVIDER ? user.providerData?.profession : undefined
-        }
-      };
+      return this.mapPrismaUserToUserProfileDto(user);
     }
+
+    async updateUserInformationByFirebaseUid(firebaseUid: string, updatedUserProfileData: UserProfileDto) {
+        const updateInput = this.constructUpdateInput(this.mapUserProfileDtoToUserEntityType(updatedUserProfileData, "userData"));
+         const updatedUser = await this.userRepository.updateUserInformationByFirebaseUid(firebaseUid, updateInput);
+         return this.mapPrismaUserToUserProfileDto(updatedUser)
+    }
+
+    mapUserProfileDtoToUserEntityType(userProfileDto, propToRemove): Partial<Prisma.UserUpdateInput> {
+        const { [propToRemove]: removed, ...newObj } = userProfileDto;
+        if (removed !== undefined) {
+            if (userProfileDto.userType === 'CLIENT') {
+                newObj.clientData = removed;
+            } else {
+                newObj.providerData = removed;
+            }
+        }
+        return newObj;
+    }
+
+    constructUpdateInput(partialUpdateInput: Partial<Prisma.UserUpdateInput>) {
+        const updateInput: Prisma.UserUpdateInput = {
+            ...partialUpdateInput,
+        };
+
+        if (partialUpdateInput.userType === "CLIENT" && partialUpdateInput.clientData) {
+            updateInput.clientData = {
+                update: {
+                    ...partialUpdateInput.clientData,
+                },
+            };
+        } else if (partialUpdateInput.userType === "PROVIDER" && partialUpdateInput.providerData) {
+            updateInput.providerData = {
+                update: {
+                    ...partialUpdateInput.providerData,
+                },
+            };
+        }
+
+        return updateInput;
+    }
+
+    mapPrismaUserToUserProfileDto(user: any): UserProfileDto {
+        return {
+            city: user.city,
+            state: user.state,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            neighborhood: user.neighborhood,
+            phone: user.phone,
+            userType: user.userType,
+            userData: {
+                street: user.userType === UserType.CLIENT ? user.clientData?.street : undefined,
+                houseNumber: user.userType === UserType.CLIENT ? user.clientData?.houseNumber : undefined,
+                reference: user.userType === UserType.CLIENT ? user.clientData?.reference : undefined,
+                profession: user.userType === UserType.PROVIDER ? user.providerData?.profession : undefined
+            }
+        };
+    }
+
   }

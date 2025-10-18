@@ -39,12 +39,21 @@ export class UserRepository {
     async getUserByFirebaseUid(firebaseUid: string): Promise<User | null> {
         const user = this.prismaClient.user.findUnique({
             where: { firebaseUid: firebaseUid },
-        });
+            include: { clientData: true, providerData: true },
+        })
 
         if (!user){
             throw new Error("Usuário não encontrado");
         }
 
         return user;
+    }
+
+    async updateUserInformationByFirebaseUid(firebaseUid: string, updateInput: Partial<Prisma.UserUpdateInput>) {
+        return this.prismaClient.user.update({
+            where: { firebaseUid },
+            include: { clientData: true, providerData: true },
+            data: updateInput,
+        });
     }
 }
