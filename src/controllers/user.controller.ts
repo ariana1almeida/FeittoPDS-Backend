@@ -43,9 +43,6 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "É necessário preencher todos os campos"});
         }
 
-        //TODO remover
-        console.log("FIREBASE_API_KEY:", FIREBASE_API_KEY);
-
         const response = await axios.post(
             `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
             {
@@ -93,6 +90,8 @@ export const login = async (req: Request, res: Response) => {
         return res.status(401).json({ error: "Email ou senha inválidos" });
     }
 }
+
+/*TODO: forgotPassword, resetPassword*/
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
