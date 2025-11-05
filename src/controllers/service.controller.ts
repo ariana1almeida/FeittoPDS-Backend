@@ -1,30 +1,29 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/database";
-import { ServiceRepository } from "../repositories/service.repository";
 import { ServiceService } from "../services/service.service";
 import { Profession, ServiceStatus } from "@prisma/client";
 
-const serviceService = new ServiceService(new ServiceRepository(prisma));
+const serviceService = ServiceService.getInstance(prisma);
 
 export const createService = async (req: Request, res: Response) => {
   try {
-    const { foto, titulo, descricao, categoria, clientId } = req.body;
+    const { picture, title, description, category, firebaseUid } = req.body;
 
-    if (!foto || !titulo || !descricao || !categoria || !clientId) {
+    if (!picture || !title || !description || !category || !firebaseUid) {
       return res.status(400).json({ error: "É necessário preencher todos os campos" });
     }
 
     // Validar se a categoria é válida
-    if (!Object.values(Profession).includes(categoria)) {
+    if (!Object.values(Profession).includes(category)) {
       return res.status(400).json({ error: "Categoria inválida" });
     }
 
     const newService = await serviceService.createService({
-      foto,
-      titulo,
-      descricao,
-      categoria,
-      clientId,
+      picture,
+      title,
+      description,
+      category,
+      firebaseUid: firebaseUid,
     });
 
     return res.status(201).json(newService);
@@ -67,13 +66,16 @@ export const getServiceById = async (req: Request, res: Response) => {
 
 export const getServicesByClient = async (req: Request, res: Response) => {
   try {
-    const { clientId } = req.params;
+      console.log('PARAMS RECEIVED', req.params.firebaseUid);
+      const { firebaseUid } = req.params;
 
-    if (!clientId) {
+
+    if (!firebaseUid) {
       return res.status(400).json({ error: "ID do cliente é obrigatório" });
     }
 
-    const services = await serviceService.getServicesByClient(clientId);
+    const services = await serviceService.getServicesByClient(firebaseUid);
+    console.log('SERVICES RETURNED:', services);
     return res.json(services);
   } catch (error: any) {
     console.error(error);
@@ -83,18 +85,18 @@ export const getServicesByClient = async (req: Request, res: Response) => {
 
 export const getServicesByCategory = async (req: Request, res: Response) => {
   try {
-    const { categoria } = req.params;
+    const { category } = req.params;
 
-    if (!categoria) {
+    if (!category) {
       return res.status(400).json({ error: "Categoria é obrigatória" });
     }
 
     // Validar se a categoria é válida
-    if (!Object.values(Profession).includes(categoria as Profession)) {
+    if (!Object.values(Profession).includes(category as Profession)) {
       return res.status(400).json({ error: "Categoria inválida" });
     }
 
-    const services = await serviceService.getServicesByCategory(categoria as Profession);
+    const services = await serviceService.getServicesByCategory(category as Profession);
     return res.json(services);
   } catch (error: any) {
     console.error(error);
@@ -105,22 +107,22 @@ export const getServicesByCategory = async (req: Request, res: Response) => {
 export const updateService = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { foto, titulo, descricao, categoria } = req.body;
+    const { picture, title, description, category } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: "ID do serviço é obrigatório" });
     }
 
     // Validar se a categoria é válida (se fornecida)
-    if (categoria && !Object.values(Profession).includes(categoria)) {
+    if (category && !Object.values(Profession).includes(category)) {
       return res.status(400).json({ error: "Categoria inválida" });
     }
 
     const updatedService = await serviceService.updateService(id, {
-      foto,
-      titulo,
-      descricao,
-      categoria,
+      picture,
+      title,
+      description,
+      category,
     });
 
     return res.json(updatedService);
