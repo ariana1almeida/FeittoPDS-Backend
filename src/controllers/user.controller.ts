@@ -65,25 +65,13 @@ export const login = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Usuário não encontrado no banco de dados" });
         }
 
-        let redirectUrl;
-        switch (user.userType) {
-            case "CLIENT":
-                redirectUrl = "/client/home";
-                break;
-            case "PROVIDER":
-                redirectUrl = "/provider/home";
-                break;
-            default:
-                redirectUrl = "/";
-        }
-
         return res.status(200).json({
+            id: user.id,
             token: idToken,
             refreshToken,
             expiresIn,
             uid: localId,
             userType: user.userType,
-            redirectUrl
         });
         }catch (error: any) {
         console.error(error.response?.data || error.message);
