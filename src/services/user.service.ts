@@ -1,4 +1,4 @@
-import {Prisma, UserType, City, State, PrismaClient} from "@prisma/client";
+import {Prisma, UserType, City, State, PrismaClient, User} from "@prisma/client";
 import { UserRepository } from "../repositories/user.repository";
 import { auth } from "../config/firebase";
 import {UserProfileDto} from "../types/UserProfileDto";
@@ -67,12 +67,13 @@ export class UserService {
 
     async updateUserInformationByFirebaseUid(firebaseUid: string, updatedUserProfileData: UserProfileDto) {
         const updateInput = this.constructUpdateInput(this.mapUserProfileDtoToUserEntityType(updatedUserProfileData, "userData"));
-         const updatedUser = await this.userRepository.updateUserInformationByFirebaseUid(firebaseUid, updateInput);
+        console.log('UPDATE INPUT:', updateInput);
+        const updatedUser = await this.userRepository.updateUserInformationByFirebaseUid(firebaseUid, updateInput);
          return this.mapPrismaUserToUserProfileDto(updatedUser)
     }
 
-    mapUserProfileDtoToUserEntityType(userProfileDto, propToRemove): Partial<Prisma.UserUpdateInput> {
-        const { [propToRemove]: removed, ...newObj } = userProfileDto;
+    mapUserProfileDtoToUserEntityType(userProfileDto: UserProfileDto, propToRemove: string): Partial<Prisma.UserUpdateInput> {
+        const { [propToRemove]: removed, ...newObj }: any = userProfileDto;
         if (removed !== undefined) {
             if (userProfileDto.userType === 'CLIENT') {
                 newObj.clientData = removed;
@@ -107,19 +108,24 @@ export class UserService {
 
     mapPrismaUserToUserProfileDto(user: any): UserProfileDto {
         return {
+            id: user.id,
             city: user.city,
             state: user.state,
             firstName: user.firstName,
             lastName: user.lastName,
             neighborhood: user.neighborhood,
             phone: user.phone,
+            picture: user.picture,
             userType: user.userType,
             userData: {
                 street: user.userType === UserType.CLIENT ? user.clientData?.street : undefined,
                 houseNumber: user.userType === UserType.CLIENT ? user.clientData?.houseNumber : undefined,
                 reference: user.userType === UserType.CLIENT ? user.clientData?.reference : undefined,
                 profession: user.userType === UserType.PROVIDER ? user.providerData?.profession : undefined
-            }
+            },
+            totalRating: user.totalRating,
+            numberOfRatings: user.numberOfRatings,
+            averageRating: user.averageRating,
         };
     }
 

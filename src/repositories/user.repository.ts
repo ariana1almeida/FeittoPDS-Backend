@@ -56,4 +56,21 @@ export class UserRepository {
             data: updateInput,
         });
     }
+
+    async findById(id: string) {
+        return this.prismaClient.user.findUnique({
+            where: { id },
+            select: {
+                totalRating: true,
+                numberOfRatings: true,
+            },
+        });
+    }
+
+    async updateRatingsSummary(id: string, totalRating: number, numberOfRatings: number, averageRating: number) {
+        return this.prismaClient.user.update({
+            where: { id },
+            data: { totalRating, numberOfRatings, averageRating },
+        });
+    }
 }
