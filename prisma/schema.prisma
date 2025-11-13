@@ -13,6 +13,7 @@ model User {
   firstName       String
   lastName        String
   phone           String
+  picture         String?
   userType        UserType
   city            City
   state           State
@@ -20,6 +21,16 @@ model User {
   clientData      ClientData?
   providerData    ProviderData?
   createdServices Service[]     @relation("ClientServices")
+
+  totalRating     Int   @default(0)
+  numberOfRatings Int   @default(0)
+  averageRating   Float @default(0)
+
+  userAvatarPicture String?
+
+  ratingsGiven    Ratings[]  @relation("RatingsGiven")
+  ratingsReceived Ratings[]  @relation("RatingsReceived")
+  proposals       Proposal[] @relation("ProposalOwner")
 
   @@map("Usuario")
 }
@@ -53,7 +64,40 @@ model Service {
   clientId String @db.ObjectId
   client   User   @relation("ClientServices", fields: [clientId], references: [id], onDelete: Cascade)
 
+  proposals Proposal[] @relation("ProposedToService")
+
   @@map("Servico")
+}
+
+model Proposal {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  serviceId  String @db.ObjectId
+  providerId String @db.ObjectId
+
+  accepted       Boolean  @default(false)
+  estimatedPrice Float
+  estimatedDays  Int
+  description    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  service  Service @relation("ProposedToService", fields: [serviceId], references: [id])
+  provider User    @relation("ProposalOwner", fields: [providerId], references: [id])
+}
+
+model Ratings {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  ratedById   String   @db.ObjectId
+  ratedUserId String   @db.ObjectId
+  score       Int
+  comment     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ratedBy   User @relation("RatingsGiven", fields: [ratedById], references: [id])
+  ratedUser User @relation("RatingsReceived", fields: [ratedUserId], references: [id])
+
+  @@unique([ratedById, ratedUserId])
 }
 
 enum UserType {
