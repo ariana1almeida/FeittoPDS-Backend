@@ -13,7 +13,6 @@ export const createService = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "É necessário preencher todos os campos" });
     }
 
-    // Validar se a categoria é válida
     if (!Object.values(Profession).includes(category)) {
       return res.status(400).json({ error: "Categoria inválida" });
     }
@@ -65,22 +64,19 @@ export const getServiceById = async (req: Request, res: Response) => {
 };
 
 export const getServicesByClient = async (req: Request, res: Response) => {
-  try {
-      console.log('PARAMS RECEIVED', req.params.firebaseUid);
-      const { firebaseUid } = req.params;
+    try {
+        const {id} = req.params;
 
+        if (!id) {
+            return res.status(400).json({error: "ID do cliente é obrigatório"});
+        }
 
-    if (!firebaseUid) {
-      return res.status(400).json({ error: "ID do cliente é obrigatório" });
+        const services = await serviceService.getServicesByClientId(id);
+        return res.json(services);
+    } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({error: error.message});
     }
-
-    const services = await serviceService.getServicesByClient(firebaseUid);
-    console.log('SERVICES RETURNED:', services);
-    return res.json(services);
-  } catch (error: any) {
-    console.error(error);
-    return res.status(500).json({ error: error.message });
-  }
 };
 
 export const getServicesByCategory = async (req: Request, res: Response) => {

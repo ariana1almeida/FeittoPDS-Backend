@@ -7,6 +7,7 @@ interface CreateOrUpdateRatingInput {
     ratedUserId: string;
     score: number;
     comment: string;
+    serviceId?: string;
 }
 
 export class RatingsService {
@@ -29,17 +30,15 @@ export class RatingsService {
     }
 
     async createOrUpdateRating(input: CreateOrUpdateRatingInput) {
-        const { ratedById, ratedUserId, score, comment } = input;
+        const { ratedById, ratedUserId, score, comment, serviceId } = input;
 
         return this.prisma.$transaction(async (tx) => {
-
             const existing = await this.ratingsRepository.findByPair(ratedById, ratedUserId);
-
             const rating = await this.ratingsRepository.createOrUpdateRating({
                 where: {
                     ratedById_ratedUserId: { ratedById, ratedUserId },
                 },
-                create: { ratedById, ratedUserId, score, comment },
+                create: { ratedById, ratedUserId, score, comment, serviceId },
                 update: { score, comment },
             });
 
@@ -49,10 +48,10 @@ export class RatingsService {
             let { totalRating, numberOfRatings } = ratedUser;
 
             if (existing) {
-                totalRating += score - existing.score; // Adjust total for updated rating
+                totalRating += score - existing.score;
             } else {
-                totalRating += score; // Add new rating to total
-                numberOfRatings++; // Increment count for new rating
+                totalRating += score;
+                numberOfRatings++;
             }
 
             const average = totalRating / numberOfRatings;

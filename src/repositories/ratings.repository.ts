@@ -20,6 +20,10 @@ export class RatingsRepository{
             where: {
                 ratedById_ratedUserId: { ratedById, ratedUserId },
             },
+            include: {
+                ratedBy: true,
+                ratedUser: true,
+            }
         });
     }
 

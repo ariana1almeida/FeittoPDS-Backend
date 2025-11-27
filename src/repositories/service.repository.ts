@@ -38,7 +38,11 @@ export class ServiceRepository {
             id: true,
             firstName: true,
             lastName: true,
-            userType: true
+            userType: true,
+            averageRating: true,
+            numberOfRatings: true,
+            neighborhood: true,
+            city: true
           }
         }
       },

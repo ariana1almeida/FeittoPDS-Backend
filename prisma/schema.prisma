@@ -26,8 +26,6 @@ model User {
   numberOfRatings Int   @default(0)
   averageRating   Float @default(0)
 
-  userAvatarPicture String?
-
   ratingsGiven    Ratings[]  @relation("RatingsGiven")
   ratingsReceived Ratings[]  @relation("RatingsReceived")
   proposals       Proposal[] @relation("ProposalOwner")
@@ -64,7 +62,8 @@ model Service {
   clientId String @db.ObjectId
   client   User   @relation("ClientServices", fields: [clientId], references: [id], onDelete: Cascade)
 
-  proposals Proposal[] @relation("ProposedToService")
+  proposals    Proposal[] @relation("ProposedToService")
+  ratedService Ratings[]  @relation("ratedService")
 
   @@map("Servico")
 }
@@ -89,13 +88,15 @@ model Ratings {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   ratedById   String   @db.ObjectId
   ratedUserId String   @db.ObjectId
+  serviceId   String?  @db.ObjectId
   score       Int
   comment     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  ratedBy   User @relation("RatingsGiven", fields: [ratedById], references: [id])
-  ratedUser User @relation("RatingsReceived", fields: [ratedUserId], references: [id])
+  service   Service? @relation("ratedService", fields: [serviceId], references: [id])
+  ratedBy   User     @relation("RatingsGiven", fields: [ratedById], references: [id])
+  ratedUser User     @relation("RatingsReceived", fields: [ratedUserId], references: [id])
 
   @@unique([ratedById, ratedUserId])
 }

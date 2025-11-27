@@ -53,4 +53,11 @@ export class ProposalService {
     }
 
 
+    async deleteProposal(proposalId: string) {
+        await this.proposalRepository.deleteProposal(proposalId);
+    }
+
+    async deleteAllProposalsFromServiceOtherThanAccepted(serviceId: string) {
+        await this.proposalRepository.deleteAllProposalsFromServiceOtherThanAccepted(serviceId);
+    }
 }

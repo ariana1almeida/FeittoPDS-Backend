@@ -65,10 +65,17 @@ export class UserService {
       return this.mapPrismaUserToUserProfileDto(user);
     }
 
-    async updateUserInformationByFirebaseUid(firebaseUid: string, updatedUserProfileData: UserProfileDto) {
+    async getUserProfileInformationByFirebaseUid(firebaseUid: string): Promise<UserProfileDto> {
+        const user = await this.userRepository.getUserProfileInformationByFirebaseUid(firebaseUid);
+        if (!user) throw new Error("User not found");
+
+        return this.mapPrismaUserToUserProfileDto(user);
+    }
+
+    async updateUserInformationById(id: string, updatedUserProfileData: UserProfileDto) {
         const updateInput = this.constructUpdateInput(this.mapUserProfileDtoToUserEntityType(updatedUserProfileData, "userData"));
         console.log('UPDATE INPUT:', updateInput);
-        const updatedUser = await this.userRepository.updateUserInformationByFirebaseUid(firebaseUid, updateInput);
+        const updatedUser = await this.userRepository.updateUserInformationById(id, updateInput);
          return this.mapPrismaUserToUserProfileDto(updatedUser)
     }
 
