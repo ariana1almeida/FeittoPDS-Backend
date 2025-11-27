@@ -63,3 +63,32 @@ export const updateProposal = async (req: any, res: any) => {
         return res.status(500).json({error: e.message});
     }
 }
+
+export const deleteProposal = async (req: any, res: any) => {
+    try {
+        const {proposalId} = req.params;
+
+        if (!proposalId) {
+            return res.status(400).json({error: "ID da proposta é obrigatório"});
+        }
+
+        await proposalService.deleteProposal(proposalId);
+        return res.status(204).send();
+    } catch (e: any) {
+        return res.status(500).json({error: e.message});
+    }
+}
+
+export const deleteAllProposalsFromServiceOtherThanAccepted = async (req: any, res: any) => {
+    try {
+        const {serviceId} = req.params;
+
+        if (!serviceId) {
+            return res.status(400).json({error: "ID do serviço é obrigatório"});
+        }
+        await proposalService.deleteAllProposalsFromServiceOtherThanAccepted(serviceId);
+        return res.status(204).send();
+    }catch (e: any) {
+        return  res.status(500).json({error: e.message});
+    }
+}

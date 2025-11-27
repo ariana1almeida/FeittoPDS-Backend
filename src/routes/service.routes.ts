@@ -22,7 +22,7 @@ router.get("/", getAllServices);
 router.get("/:id", getServiceById);
 
 // Buscar serviços por cliente
-router.get("/client/:firebaseUid", getServicesByClient);
+router.get("/client/:id", getServicesByClient);
 
 // Buscar serviços por categoria
 router.get("/category/:categoria", getServicesByCategory);

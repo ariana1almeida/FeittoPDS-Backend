@@ -21,7 +21,7 @@ export class ServiceService {
     }
 
     async createService(input: CreateServiceInput) {
-        const user = await this.userRepository.getUserByFirebaseUid(input.firebaseUid);
+        const user = await this.userRepository.getUserById(input.firebaseUid);
 
         const serviceData: Prisma.ServiceCreateInput = {
             picture: input.picture,
@@ -45,10 +45,8 @@ export class ServiceService {
         return this.serviceRepository.getServiceById(id);
     }
 
-    async getServicesByClient(firebaseUid: string) {
-        const user = await this.userRepository.getUserByFirebaseUid(firebaseUid);
-        // @ts-ignore
-        return this.serviceRepository.getServicesByClient(user.id);
+    async getServicesByClientId(id: string) {
+        return this.serviceRepository.getServicesByClient(id);
     }
 
     async getServicesByCategory(categoria: Profession) {

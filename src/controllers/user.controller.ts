@@ -59,7 +59,7 @@ export const login = async (req: Request, res: Response) => {
         };
         const { idToken, refreshToken, expiresIn, localId } = response.data as FirebaseLoginResponse;
 
-        const user = await userService.getUserProfileInformation(localId);
+        const user = await userService.getUserProfileInformationByFirebaseUid(localId);
 
         if (!user) {
             return res.status(404).json({ error: "Usuário não encontrado no banco de dados" });
@@ -114,7 +114,7 @@ export const updateProfile = async (req: Request, res: Response) => {
             })
         }
 
-        const updateResult = await userService.updateUserInformationByFirebaseUid(uniqueIdentifier, updateInformation);
+        const updateResult = await userService.updateUserInformationById(uniqueIdentifier, updateInformation);
 
 
         return res.status(200).json(updateResult);

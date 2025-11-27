@@ -29,14 +29,21 @@ export class UserRepository {
      * Get user profile information by user ID, including related clientData and providerData.
      * @param userId
      */
-    async getUserProfileInformation(firebaseUid: any) {
+    async getUserProfileInformation(id: any) {
+        return this.prismaClient.user.findUnique({
+            where: { id: id },
+            include: { clientData: true, providerData: true },
+        });
+    }
+
+    async getUserProfileInformationByFirebaseUid(firebaseUid: any) {
         return this.prismaClient.user.findUnique({
             where: { firebaseUid: firebaseUid },
             include: { clientData: true, providerData: true },
         });
     }
 
-    async getUserByFirebaseUid(firebaseUid: string): Promise<User | null> {
+    async getUserById(firebaseUid: string): Promise<User | null> {
         const user = this.prismaClient.user.findUnique({
             where: { firebaseUid: firebaseUid },
             include: { clientData: true, providerData: true },
@@ -49,9 +56,9 @@ export class UserRepository {
         return user;
     }
 
-    async updateUserInformationByFirebaseUid(firebaseUid: string, updateInput: Partial<Prisma.UserUpdateInput>) {
+    async updateUserInformationById(id: string, updateInput: Partial<Prisma.UserUpdateInput>) {
         return this.prismaClient.user.update({
-            where: { firebaseUid },
+            where: { id: id },
             include: { clientData: true, providerData: true },
             data: updateInput,
         });

@@ -23,8 +23,16 @@ export class ProposalRepository{
 
     async getAllProposals(serviceId: string): Promise<Proposal[]> {
         return this.prismaClient.proposal.findMany({
-            where: { serviceId},
-            include: { service: true, provider: true }
+            where: { serviceId },
+            orderBy: { accepted: 'desc' },
+            include: {
+                service: true,
+                provider: {
+                    include: {
+                        providerData: true,
+                    },
+                },
+            },
         });
     }
 
@@ -45,7 +53,29 @@ export class ProposalRepository{
     getAllProposalsByProviderId(providerId: string) {
         return this.prismaClient.proposal.findMany({
             where: { providerId },
-            include: { service: true, provider: true }
+            include: {
+                service: true,
+                provider: {
+                    include: {
+                        providerData: true
+                    }
+                },
+            }
+        });
+    }
+
+    deleteProposal(proposalId: string) {
+        return this.prismaClient.proposal.delete({
+            where: {id: proposalId}
+        });
+    }
+
+    deleteAllProposalsFromServiceOtherThanAccepted(serviceId: string) {
+        return this.prismaClient.proposal.deleteMany({
+            where: {
+                serviceId,
+                accepted: false
+            }
         });
     }
 }

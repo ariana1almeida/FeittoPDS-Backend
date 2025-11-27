@@ -23,13 +23,13 @@ export const getRating = async (req: any, res: any) => {
 
 export const createOrUpdateRating = async (req: any, res: any) => {
     try {
-        const { ratedById, ratedUserId, score, comment } = req.body;
+        const { ratedById, ratedUserId, score, comment, serviceId } = req.body;
 
         if (!ratedById || !ratedUserId || score === undefined) {
             return res.status(400).json({ error: "ratedById, ratedUserId and score are required" });
         }
 
-        const rating = await ratingsService.createOrUpdateRating({ ratedById, ratedUserId, score, comment });
+        const rating = await ratingsService.createOrUpdateRating({ ratedById, ratedUserId, score, comment, serviceId });
         return res.status(200).json(rating);
     }catch (e:any) {
         return res.status(500).json({error: e.message});
