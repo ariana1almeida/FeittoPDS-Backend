@@ -32,14 +32,19 @@ export const createService = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllServices = async (req: Request, res: Response) => {
-  try {
-    const services = await serviceService.getAllServices();
-    return res.json(services);
-  } catch (error: any) {
-    console.error(error);
-    return res.status(500).json({ error: error.message });
-  }
+export const getAllServicesAvailableByProviderId = async (req: Request, res: Response) => {
+    try {
+        const {id} = req.params;
+        if (!id) {
+            return res.status(400).json({error: "ID do provedor é obrigatório"});
+        }
+
+        const services = await serviceService.getAllServicesAvailableByProviderId(id);
+        return res.json(services);
+    } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({error: error.message});
+    }
 };
 
 export const getServiceById = async (req: Request, res: Response) => {

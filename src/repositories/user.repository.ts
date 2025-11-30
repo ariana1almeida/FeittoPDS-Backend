@@ -43,7 +43,7 @@ export class UserRepository {
         });
     }
 
-    async getUserById(firebaseUid: string): Promise<User | null> {
+    async getUserByFirebaseUid(firebaseUid: string): Promise<Prisma.UserGetPayload<{ include: { clientData: true, providerData: true } }> | null> {
         const user = this.prismaClient.user.findUnique({
             where: { firebaseUid: firebaseUid },
             include: { clientData: true, providerData: true },
@@ -54,6 +54,13 @@ export class UserRepository {
         }
 
         return user;
+    }
+
+    async getUserById(id: string): Promise<Prisma.UserGetPayload<{ include: { clientData: true, providerData: true } }> | null> {
+        return this.prismaClient.user.findUnique({
+            where: { id: id },
+            include: { clientData: true, providerData: true },
+        });
     }
 
     async updateUserInformationById(id: string, updateInput: Partial<Prisma.UserUpdateInput>) {

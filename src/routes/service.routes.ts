@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   createService,
-  getAllServices,
+  getAllServicesAvailableByProviderId,
   getServiceById,
   getServicesByClient,
   getServicesByCategory,
@@ -16,7 +16,7 @@ const router = Router();
 router.post("/", createService);
 
 // Buscar todos os serviços
-router.get("/", getAllServices);
+router.get("/provider/:id", getAllServicesAvailableByProviderId);
 
 // Buscar serviço por ID
 router.get("/:id", getServiceById);

@@ -1,4 +1,4 @@
-import {Prisma, PrismaClient, Profession, ServiceStatus} from "@prisma/client";
+import {City, Prisma, PrismaClient, Profession, ServiceStatus} from "@prisma/client";
 import {ServiceRepository} from "../repositories/service.repository";
 import {UserRepository} from "../repositories/user.repository";
 import {CreateServiceInput} from "../types/CreateServiceInput";
@@ -21,7 +21,7 @@ export class ServiceService {
     }
 
     async createService(input: CreateServiceInput) {
-        const user = await this.userRepository.getUserById(input.firebaseUid);
+        const user = await this.userRepository.getUserByFirebaseUid(input.firebaseUid);
 
         const serviceData: Prisma.ServiceCreateInput = {
             picture: input.picture,
@@ -29,6 +29,7 @@ export class ServiceService {
             description: input.description,
             category: input.category,
             status: ServiceStatus.OPEN,
+            city: user?.city as City,
             client: {
                 connect: {id: user?.id}
             }
@@ -37,8 +38,14 @@ export class ServiceService {
         return this.serviceRepository.createService(serviceData);
     }
 
-    async getAllServices() {
-        return this.serviceRepository.getAllServices();
+    async getAllServicesAvailableByProviderId(id: string) {
+        const user = await this.userRepository.getUserById(id);
+        console.log('USER TYPE OF ', user);
+        if (!user) {
+            throw new Error("Usuário não encontrado");
+        }
+
+        return this.serviceRepository.getAllServicesAvailableByProviderId(user);
     }
 
     async getServiceById(id: string) {
