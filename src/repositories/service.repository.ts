@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import {Prisma, PrismaClient} from "@prisma/client";
 export class ServiceRepository {
   private static instance: ServiceRepository;
   private prismaClient: PrismaClient;
@@ -30,25 +30,32 @@ export class ServiceRepository {
     });
   }
 
-  async getAllServices() {
+  async getAllServicesAvailableByProviderId(user: Prisma.UserGetPayload<{ include: { clientData: true, providerData: true } }>) {
+
     return this.prismaClient.service.findMany({
-      include: {
-        client: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            userType: true,
-            averageRating: true,
-            numberOfRatings: true,
-            neighborhood: true,
-            city: true
-          }
+        where:{
+            city: user.city,
+            category: {
+                in: user?.providerData?.professions
+            }
+        },
+        include: {
+            client: {
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    userType: true,
+                    averageRating: true,
+                    numberOfRatings: true,
+                    neighborhood: true,
+                    city: true
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
     });
   }
 
