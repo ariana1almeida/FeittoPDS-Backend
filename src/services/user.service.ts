@@ -1,4 +1,4 @@
-import {Prisma, UserType, City, State, PrismaClient, User} from "@prisma/client";
+import {Prisma, UserType, City, State, PrismaClient} from "@prisma/client";
 import { UserRepository } from "../repositories/user.repository";
 import { auth } from "../config/firebase";
 import {UserProfileDto} from "../types/UserProfileDto";
@@ -47,7 +47,11 @@ export class UserService {
         userType: input.userType,
         ...(input.userType === "CLIENT"
             ? {clientData: {create: {...input.data}}}
-            : {providerData: {create: {profession: input.data.profession}}}),
+            : {providerData: {
+                create: { professions: Array.isArray(input.data?.professions)
+                        ? input.data.professions
+                        : (input.data?.professions ? [input.data.professions] : [])
+                }}})
       };
 
       return this.userRepository.createUser(userData);
@@ -128,7 +132,7 @@ export class UserService {
                 street: user.userType === UserType.CLIENT ? user.clientData?.street : undefined,
                 houseNumber: user.userType === UserType.CLIENT ? user.clientData?.houseNumber : undefined,
                 reference: user.userType === UserType.CLIENT ? user.clientData?.reference : undefined,
-                profession: user.userType === UserType.PROVIDER ? user.providerData?.profession : undefined
+                professions: user.userType === UserType.PROVIDER ? user.providerData?.professions : undefined
             },
             totalRating: user.totalRating,
             numberOfRatings: user.numberOfRatings,
