@@ -43,10 +43,10 @@ model ClientData {
 }
 
 model ProviderData {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  profession Profession
-  userId     String     @unique @db.ObjectId
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  professions Profession[]
+  userId      String       @unique @db.ObjectId
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Service {
