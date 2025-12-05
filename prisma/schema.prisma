@@ -26,9 +26,11 @@ model User {
   numberOfRatings Int   @default(0)
   averageRating   Float @default(0)
 
-  ratingsGiven    Ratings[]  @relation("RatingsGiven")
-  ratingsReceived Ratings[]  @relation("RatingsReceived")
-  proposals       Proposal[] @relation("ProposalOwner")
+  ratingsGiven     Ratings[]  @relation("RatingsGiven")
+  ratingsReceived  Ratings[]  @relation("RatingsReceived")
+  proposals        Proposal[] @relation("ProposalOwner")
+  ChatRoomClient   ChatRoom[] @relation("ChatRoomClient")
+  ChatRoomProvider ChatRoom[] @relation("ChatRoomProvider")
 
   @@map("Usuario")
 }
@@ -100,6 +102,31 @@ model Ratings {
   ratedUser User     @relation("RatingsReceived", fields: [ratedUserId], references: [id])
 
   @@unique([ratedById, ratedUserId])
+}
+
+model ChatRoom {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  clientId   String
+  providerId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  client   User          @relation("ChatRoomClient", fields: [clientId], references: [firebaseUid])
+  provider User          @relation("ChatRoomProvider", fields: [providerId], references: [firebaseUid])
+  messages ChatMessage[]
+
+  @@unique([clientId, providerId])
+}
+
+model ChatMessage {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatRoomId String   @db.ObjectId
+  senderId   String
+  content    String
+  timestamp  DateTime @default(now())
+
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
 }
 
 enum UserType {
