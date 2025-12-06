@@ -35,3 +35,18 @@ export const createOrUpdateRating = async (req: any, res: any) => {
         return res.status(500).json({error: e.message});
     }
 }
+
+export const getAllRatingsFromCurrentUser = async (req: any, res: any) => {
+    const {ratedUserId} = req.params;
+
+    if (!ratedUserId) {
+        return res.status(400).json({error: "ratedUserId is required"});
+    }
+
+    try {
+        const ratings = await ratingsService.getAllRatingsFromCurrentUser(ratedUserId);
+        return res.status(200).json(ratings);
+    } catch (e: any) {
+        return res.status(500).json({error: e.message});
+    }
+}

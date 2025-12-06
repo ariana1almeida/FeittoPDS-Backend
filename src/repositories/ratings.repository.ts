@@ -31,4 +31,14 @@ export class RatingsRepository{
         return this.prismaClient.ratings.upsert(ratingData);
     }
 
+    async getAllRatingsFromCurrentUser(ratedUserId: string) {
+        return this.prismaClient.ratings.findMany({
+            where: { ratedUserId: ratedUserId },
+            include: {
+                ratedUser: true,
+                ratedBy: true
+            }
+        });
+    }
+
 }
