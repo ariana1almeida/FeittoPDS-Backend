@@ -65,4 +65,8 @@ export class RatingsService {
     async getRating(ratedById: string, ratedUserId: string) {
         return await this.ratingsRepository.findByPair(ratedById, ratedUserId);
     }
+
+    async getAllRatingsFromCurrentUser(ratedUserId: string) {
+        return this.ratingsRepository.getAllRatingsFromCurrentUser(ratedUserId);
+    }
 }

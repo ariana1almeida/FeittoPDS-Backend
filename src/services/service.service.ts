@@ -40,7 +40,6 @@ export class ServiceService {
 
     async getAllServicesAvailableByProviderId(id: string) {
         const user = await this.userRepository.getUserById(id);
-        console.log('USER TYPE OF ', user);
         if (!user) {
             throw new Error("Usuário não encontrado");
         }
